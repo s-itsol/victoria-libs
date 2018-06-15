@@ -1,0 +1,39 @@
+apply plugin: "java"
+
+sourceCompatibility = 1.8
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+// ここに依存ライブラリの記述を行う
+dependencies {
+    compile "org.springframework:spring-webflux:latest.release"
+//    compile "org.glassfish.jersey.media:jersey-media-json-jackson:latest.release"     // jackson の例
+//    compile "mysql:mysql-connector-java:latest.release"                                            // MySQLコネクタの例
+}
+
+// ファイルのコピー先(カレントからの相対PATH)
+def dependJarCopyTo = 'jar'
+
+// コピー先にあるファイルをいったん削除
+task delDependJar << {
+    delete dependJarCopyTo
+}
+
+// 依存するライブラリjarを指定したディレクトリにコピーする
+task getDependJar(dependsOn: delDependJar) {
+    doLast {
+        configurations.compile.each {
+            def fromJarFile = it.absolutePath
+            copy {
+                from fromJarFile
+                into dependJarCopyTo
+            }
+        }
+        println "----- 以下のjarファイルを取得しました -----"
+        FileCollection copyFiles = files { file(dependJarCopyTo).listFiles() }
+        copyFiles.each {File file -> println file.name}
+    }
+}
