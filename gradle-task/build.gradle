@@ -9,8 +9,9 @@ repositories {
 
 // ここに依存ライブラリの記述を行う
 dependencies {
-	compile "org.springframework:spring-webmvc:4.3.9+"							// spring-mvc：バージョン指定
+//	compile "org.springframework:spring-webmvc:4.3.9+"							// spring-mvc：バージョン指定
 //	compile "org.springframework:spring-webmvc:4.3+"							// spring-mvc：バージョン指定4.3系
+	compile "org.springframework:spring-webmvc:5.0.7+"							// spring-mvc：バージョン指定
 //	compile "org.springframework:spring-webmvc:latest.release"					// spring-mvc：最新版
 //	compile "org.springframework:spring-webflux:latest.release"					// spring-webflux：最新版
 }
@@ -43,5 +44,37 @@ task getDependJar(dependsOn: delDependJar) {
 		copyFiles.each {
 			File file -> println file.name
 		}
+    }
+}
+
+// ソースダウンロード
+task collectSourcesJar << {
+    DependencyHandler dependencyHandler = project.dependencies
+    project.configurations.each { Configuration configration ->
+        // scope毎に全部欲しい場合はLenientConfiguration#getArtifactsの引数をorg.gradle.api.specs.Specs#satisfyAllに変える
+        def componentIdentifiers = configration.resolvedConfiguration.lenientConfiguration.getArtifacts { Dependency dependency ->
+            configration.dependencies.contains(dependency)
+        }.collect { ResolvedArtifact artifact ->
+            ModuleVersionIdentifier id = artifact.moduleVersion.id
+            DefaultModuleComponentIdentifier.newId(id)
+        }
+        ArtifactResolutionQuery query = dependencyHandler.createArtifactResolutionQuery()
+        query.forComponents(componentIdentifiers)
+        query.withArtifacts(JvmLibrary, SourcesArtifact)
+        def sourcesJars = []
+        ArtifactResolutionResult resolutionResult = query.execute()
+        resolutionResult.resolvedComponents.each { ComponentArtifactsResult componentArtifactsResult ->
+            componentArtifactsResult.getArtifacts(SourcesArtifact).each { ArtifactResult artifactResult ->
+                if (artifactResult instanceof ResolvedArtifactResult) {
+                    sourcesJars << artifactResult.file
+                }
+            }
+        }
+
+        // build/dependencies/compile-sources/ などに出力する
+        project.copy {
+            from sourcesJars
+            into "download_sources"
+        }
     }
 }
