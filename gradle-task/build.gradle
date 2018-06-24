@@ -11,8 +11,9 @@ repositories {
 dependencies {
 //	compile "org.springframework:spring-webmvc:4.3.9+"							// spring-mvc：バージョン指定
 //	compile "org.springframework:spring-webmvc:4.3+"							// spring-mvc：バージョン指定4.3系
-	compile "org.springframework:spring-webmvc:5.0.7+"							// spring-mvc：バージョン指定
+//	compile "org.springframework:spring-webmvc:5.0.7+"							// spring-mvc：バージョン指定
 //	compile "org.springframework:spring-webmvc:latest.release"					// spring-mvc：最新版
+	compile "org.springframework:spring-webflux:5.0.7+"							// spring-webflux：バージョン指定
 //	compile "org.springframework:spring-webflux:latest.release"					// spring-webflux：最新版
 }
 
